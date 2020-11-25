@@ -1,49 +1,61 @@
-import React, { Component } from 'react'
-import axios from 'axios'
+import React, { Component } from 'react';
+import axios from 'axios';
 import './App.css';
-import TableData from './components/TableOfData'
-import Search from './components/Search'
-
+import TableData from './components/TableOfData';
+import Search from './components/Search';
+import Pagination from './components/Pagination';
 
 class App extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       people: [],
-    }
+      pageNumber: 1,
+      loading: true
+    };
+
+    this.changePage = this.changePage.bind(this);
   }
 
   async componentDidMount() {
     try {
-      const peopleData = await axios.get('https://swapi.dev/api/people')
-      peopleData.data.results.map(async characterData => {
-        const characterHomeWorld = await axios.get(characterData.homeworld)
-        const characterSpecies = await axios.get(characterData.species)
-        let isHuman = !characterSpecies.data.name ? characterData.species = 'Human' : characterData.species = characterSpecies.data.name
-        const peopleState = this.state.people
+      const peopleData = await axios.get('https://swapi.dev/api/people');
+      peopleData.data.results.map(async (characterData) => {
+        const characterHomeWorld = await axios.get(characterData.homeworld);
+        const characterSpecies = await axios.get(characterData.species);
+        let isHuman = !characterSpecies.data.name
+          ? (characterData.species = 'Human')
+          : (characterData.species = characterSpecies.data.name);
+        const peopleState = this.state.people;
         peopleState.push({
           people: characterData,
           homeworld: characterHomeWorld.data.name,
           species: isHuman
-        })
+        });
         this.setState({
           people: peopleState
-        })
-      })
+        });
+      });
+    } catch (err) {
+      console.log(err, 'not successful');
     }
 
-    catch (err) {
-      console.log(err, 'not successful')
-    }
+    console.log(this.state);
+  }
 
-    console.log(this.state)
+  changePage(number) {
+    console.log('I done clicked mmmm hm.');
+    this.setState({
+      pageNumber: number
+    });
   }
 
   render() {
     return (
-      <div className="App">
+      <div className='App'>
         <Search />
         <TableData passingData={this.state.people} />
+        <Pagination changePage={this.changePage} />
       </div>
     );
   }
