@@ -10,16 +10,28 @@ class App extends Component {
     super(props);
     this.state = {
       people: [],
-      pageNumber: 1,
-      loading: true
+      pageNumber: 1
     };
 
     this.changePage = this.changePage.bind(this);
+    this.getPeopleData = this.getPeopleData.bind(this);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.getPeopleData();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.pageNumber !== this.state.pageNumber) {
+      this.getPeopleData();
+    }
+  }
+
+  async getPeopleData() {
     try {
-      const peopleData = await axios.get('https://swapi.dev/api/people');
+      const peopleData = await axios.get(
+        'https://swapi.dev/api/people/?page=' + this.state.pageNumber
+      );
       peopleData.data.results.map(async (characterData) => {
         const characterHomeWorld = await axios.get(characterData.homeworld);
         const characterSpecies = await axios.get(characterData.species);
